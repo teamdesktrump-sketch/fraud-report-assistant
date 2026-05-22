@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ReportFraud.ftc.gov</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Source Sans Pro', Arial, sans-serif; background: #fff; color: #1b1b1b; }
+    .progress-bar-fill { background: #1a4480; height: 8px; border-radius: 4px; transition: width 0.3s ease; }
+    .option-card { border: 2px solid transparent; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+    .option-card:hover { border-color: #1a4480; }
+    .option-card.selected { border-color: #1a4480; background: #dce8f8; }
+    .option-card input[type="radio"] { accent-color: #1a4480; }
+    .btn-continue { background: #1a4480; color: #fff; border: none; padding: 10px 28px; font-size: 1rem; border-radius: 3px; cursor: pointer; font-weight: 600; }
+    .btn-continue:hover { background: #162e5a; }
+    .btn-continue:disabled { background: #aaa; cursor: not-allowed; }
+    .btn-back { background: transparent; color: #1a4480; border: 2px solid #1a4480; padding: 10px 28px; font-size: 1rem; border-radius: 3px; cursor: pointer; font-weight: 600; margin-right: 10px; }
+    .btn-back:hover { background: #e8f0fa; }
+    .usa-banner { background: #f0f0f0; padding: 6px 16px; font-size: 0.82rem; display: flex; align-items: center; gap: 8px; }
+    .usa-banner img { height: 14px; }
+    .ftc-header { border-bottom: 3px solid #1a4480; padding: 12px 24px; display: flex; align-items: center; gap: 32px; }
+    .ftc-logo-main { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .ftc-logo-main .site-name { font-size: 1.5rem; font-weight: 700; color: #1a4480; }
+    .ftc-logo-main .agency { font-size: 0.7rem; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.5px; }
+    .top-links { display: flex; gap: 24px; margin-left: auto; }
+    .top-link { display: flex; align-items: center; gap: 6px; text-decoration: none; color: #1a4480; font-size: 0.8rem; font-weight: 600; }
+    .top-link:hover { text-decoration: underline; }
+    .main-container { max-width: 860px; margin: 0 auto; padding: 32px 20px 60px; }
+    .progress-section { margin-bottom: 28px; }
+    .progress-labels { display: flex; justify-content: space-between; font-size: 0.85rem; color: #555; margin-bottom: 6px; font-weight: 600; }
+    .progress-track { background: #e0e0e0; border-radius: 4px; height: 8px; }
+    .question-title { font-size: 1.5rem; font-weight: 700; color: #1b1b1b; margin-bottom: 8px; }
+    .question-sub { font-size: 0.95rem; color: #444; margin-bottom: 20px; }
+    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+    @media (max-width: 600px) { .options-grid { grid-template-columns: 1fr; } .top-links { display: none; } }
+    .option-card { background: #dce8f8; border-radius: 4px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; font-size: 0.97rem; }
+    .option-card label { cursor: pointer; font-weight: 600; color: #1b1b1b; }
+    .option-card .sub { font-weight: 400; font-size: 0.88rem; color: #444; }
+    .text-input { width: 100%; border: 1px solid #565c65; padding: 10px 12px; font-size: 1rem; border-radius: 3px; margin-bottom: 16px; }
+    .text-input:focus { outline: 2px solid #1a4480; border-color: #1a4480; }
+    textarea.text-input { resize: vertical; min-height: 100px; }
+    .form-label { font-weight: 600; font-size: 0.95rem; color: #1b1b1b; margin-bottom: 5px; display: block; }
+    .form-hint { font-size: 0.83rem; color: #555; margin-bottom: 8px; }
+    .ftc-footer { background: #1b1b1b; color: #ddd; padding: 28px 24px; margin-top: 60px; font-size: 0.88rem; }
+    .ftc-footer a { color: #9dccff; text-decoration: none; }
+    .ftc-footer a:hover { text-decoration: underline; }
+    .footer-grid { max-width: 860px; margin: 0 auto; display: flex; gap: 40px; flex-wrap: wrap; }
+    .confirmation-box { background: #ecf3ec; border-left: 6px solid #2e8540; padding: 20px 24px; border-radius: 3px; margin-bottom: 24px; }
+    .confirmation-box h2 { color: #2e8540; font-size: 1.3rem; margin-bottom: 8px; }
+    .confirmation-number { font-weight: 700; font-size: 1.1rem; color: #1a4480; }
+    .section-divider { border: none; border-top: 1px solid #ddd; margin: 24px 0; }
+    .review-row { display: flex; gap: 16px; margin-bottom: 12px; font-size: 0.95rem; }
+    .review-label { min-width: 180px; font-weight: 600; color: #444; }
+    .review-value { color: #1b1b1b; }
+    select.text-input { appearance: auto; }
+    .alert-box { background: #fef0c8; border-left: 4px solid #e5a000; padding: 14px 18px; margin-bottom: 20px; border-radius: 2px; font-size: 0.93rem; }
+  </style>
+</head>
+<body>
+
+<!-- USA Banner -->
+<div class="usa-banner">
+  <span>🇺🇸</span>
+  <span>An official website of the United States government</span>
+  <a href="#" style="color:#1a4480;font-weight:600;font-size:0.82rem;margin-left:4px;">Here's how you know ▾</a>
+</div>
+
+<!-- Header -->
+<header class="ftc-header">
+  <div class="top-links" style="margin-left:0; margin-right: auto;">
+    <a href="https://takeitdown.ftc.gov" class="top-link" target="_blank">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Federal_Trade_Commission_seal.svg" style="height:22px;" alt="FTC"/>
+      <span style="display:flex;flex-direction:column;line-height:1.2;"><small style="font-size:0.65rem;font-weight:600;color:#555;text-transform:uppercase;">FEDERAL TRADE COMMISSION</small><span style="font-size:0.85rem;font-weight:700;color:#1a4480;">TakeItDown.ftc.gov</span></span>
+    </a>
+    <a href="https://identitytheft.gov" class="top-link" target="_blank">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Federal_Trade_Commission_seal.svg" style="height:22px;" alt="FTC"/>
+      <span style="display:flex;flex-direction:column;line-height:1.2;"><small style="font-size:0.65rem;font-weight:600;color:#555;text-transform:uppercase;">FEDERAL TRADE COMMISSION</small><span style="font-size:0.85rem;font-weight:700;color:#1a4480;">IdentityTheft.gov</span></span>
+    </a>
+    <a href="https://donotcall.gov" class="top-link" target="_blank">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Federal_Trade_Commission_seal.svg" style="height:22px;" alt="FTC"/>
+      <span style="display:flex;flex-direction:column;line-height:1.2;"><small style="font-size:0.65rem;font-weight:600;color:#555;text-transform:uppercase;">FEDERAL TRADE COMMISSION</small><span style="font-size:0.85rem;font-weight:700;color:#1a4480;">DoNotCall.gov</span></span>
+    </a>
+  </div>
+</header>
+
+<div style="border-bottom:2px solid #1a4480;padding:14px 24px;display:flex;align-items:center;gap:12px;">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Federal_Trade_Commission_seal.svg" style="height:52px;" alt="FTC Seal"/>
+  <div>
+    <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#555;letter-spacing:0.5px;">FEDERAL TRADE COMMISSION</div>
+    <div style="font-size:1.55rem;font-weight:700;color:#1a4480;">ReportFraud.ftc.gov</div>
+  </div>
+</div>
+
+<!-- Main App -->
+<div class="main-container">
+  <div id="app"></div>
+</div>
+
+<!-- Footer -->
+<footer class="ftc-footer">
+  <div class="footer-grid">
+    <div>
+      <p style="margin-bottom:10px;">ReportFraud.ftc.gov is the federal government's website where you can report fraud, scams, and bad business practices.</p>
+      <p>Visit <a href="https://consumer.ftc.gov">consumer.ftc.gov</a> to find tips and learn how to avoid scams.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <a href="#">Privacy Policy</a>
+      <a href="#">FAQs</a>
+      <a href="#">Report Now</a>
+    </div>
+  </div>
+  <div style="max-width:860px;margin:16px auto 0;font-size:0.78rem;color:#aaa;">
+    OMB CONTROL#: 3084-0169 | Under the Paperwork Reduction Act, federal agencies are not allowed to collect information from the public without a valid OMB control number.
+  </div>
+</footer>
+
+<script>
+// =====================
+// FRAUD REPORT WIZARD
+// =====================
+
+const STEPS = ['category','detail','what_happened','contact_info','review','confirmation'];
+const STEP_LABELS = { category: 'Start', confirmation: 'Submit' };
+
+let state = {
+  step: 0,
+  category: '',
+  sub_category: '',
+  description: '',
+  amount_lost: '',
+  contact_method: '',
+  scammer_info: '',
+  first_name: '',
+  last_name: '',
+  email: '',
+  phone: '',
+  zip_code: '',
+  report_number: ''
+};
+
+const CATEGORIES = [
+  { id: 'impersonator', label: 'An impersonator', sub: '(ex. fake government, business, love interest, grandchild)' },
+  { id: 'online_shopping', label: 'Online shopping', sub: '' },
+  { id: 'job_investment', label: 'Job, investment, money-making opportunity, franchise', sub: '' },
+  { id: 'sweepstakes', label: 'Sweepstakes, prize, lottery', sub: '' },
+  { id: 'phone_internet', label: 'Phone, internet, TV service', sub: '' },
+  { id: 'auto', label: 'Auto sale, repair', sub: '' },
+  { id: 'health', label: 'Health', sub: '(ex. weight loss, eye care, treatment)' },
+  { id: 'credit', label: 'Credit, debt, loan', sub: '(ex. debt collection, credit report, student loan debt relief)' },
+  { id: 'annoying_call', label: 'Just an annoying call', sub: '' },
+  { id: 'something_else', label: 'Something else', sub: '(we\'ll get it to the right place)' },
+];
+
+const SUB_CATEGORIES = {
+  impersonator: [
+    'A government impersonator (e.g., Social Security, IRS, Medicare, FTC)',
+    'A business impersonator (e.g., Amazon, Apple, bank)',
+    'A family/friend impersonator',
+    'A romantic interest / love scam',
+    'A tech support impersonator',
+    'Other impersonation',
+  ],
+  online_shopping: [
+    'I paid but never received the item',
+    'I received a counterfeit or fake item',
+    'Unauthorized charges on my account',
+    'Misleading or deceptive product listing',
+    'Other online shopping problem',
+  ],
+  job_investment: [
+    'Fake job offer',
+    'Pyramid scheme / multi-level marketing',
+    'Fake investment / crypto scam',
+    'Fake franchise opportunity',
+    'Work-from-home scam',
+    'Other',
+  ],
+  sweepstakes: [
+    'I was told I won a prize but had to pay fees',
+    'I never received a prize I was promised',
+    'Fake lottery notification',
+    'Other',
+  ],
+  phone_internet: [
+    'Unauthorized charges on my phone/internet bill',
+    'Misleading service contract or terms',
+    'Service not as advertised',
+    'Early termination fee dispute',
+    'Other',
+  ],
+  auto: [
+    'Car dealer added undisclosed fees',
+    'Auto repair fraud',
+    'Misrepresentation of vehicle condition',
+    'Repossession issues',
+    'Other',
+  ],
+  health: [
+    'Fake or unproven health product',
+    'Weight loss scam',
+    'Fake cancer cure or treatment',
+    'Dental or vision fraud',
+    'Other',
+  ],
+  credit: [
+    'Debt collector harassment',
+    'Errors on my credit report',
+    'Student loan relief scam',
+    'Payday loan issues',
+    'Other',
+  ],
+  annoying_call: [
+    'Robocall',
+    'Telemarketer (I\'m on the Do Not Call list)',
+    'Text message spam',
+    'Silent call',
+    'Other',
+  ],
+  something_else: [
+    'Travel, vacation, or timeshare',
+    'Education scam',
+    'Real estate or mortgage',
+    'Immigration scam',
+    'Other',
+  ],
+};
+
+const CONTACT_METHODS = [
+  'By phone call', 'By text message', 'By email', 'Online (website, social media, app)',
+  'By mail', 'In person', 'Other',
+];
+
+const AMOUNT_OPTIONS = [
+  'I didn\'t pay anything', 'Under $100', '$100 – $499', '$500 – $999',
+  '$1,000 – $4,999', '$5,000 – $9,999', '$10,000 – $49,999', '$50,000 or more',
+];
+
+function getProgress() {
+  return Math.round((state.step / (STEPS.length - 1)) * 100);
+}
+
+function render() {
+  const app = document.getElementById('app');
+  const progress = getProgress();
+
+  let progressHTML = `
+    <div class="progress-section">
+      <div class="progress-labels"><span>Start</span><span>Submit</span></div>
+      <div class="progress-track"><div class="progress-bar-fill" style="width:${progress}%"></div></div>
+    </div>
+  `;
+
+  let content = '';
+  const step = STEPS[state.step];
+
+  if (step === 'category') {
+    content = renderCategory();
+  } else if (step === 'detail') {
+    content = renderDetail();
+  } else if (step === 'what_happened') {
+    content = renderWhatHappened();
+  } else if (step === 'contact_info') {
+    content = renderContactInfo();
+  } else if (step === 'review') {
+    content = renderReview();
+  } else if (step === 'confirmation') {
+    content = renderConfirmation();
+    progressHTML = `
+      <div class="progress-section">
+        <div class="progress-labels"><span>Start</span><span>Submit</span></div>
+        <div class="progress-track"><div class="progress-bar-fill" style="width:100%"></div></div>
+      </div>`;
+  }
+
+  app.innerHTML = progressHTML + content;
+  attachEvents();
+}
+
+function renderCategory() {
+  const opts = CATEGORIES.map(c => `
+    <div class="option-card ${state.category === c.id ? 'selected' : ''}" data-value="${c.id}" onclick="selectCategory('${c.id}')">
+      <input type="radio" name="category" value="${c.id}" ${state.category === c.id ? 'checked' : ''} style="min-width:18px;height:18px;"/>
+      <div>
+        <label for="">${c.label}</label>
+        ${c.sub ? `<div class="sub">${c.sub}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+
+  return `
+    <h1 class="question-title">Is your report about any of these common problems?</h1>
+    <p class="question-sub">Choose the best fit. If you don't see your problem, choose "Something else."</p>
+    <div class="options-grid">${opts}</div>
+    <div>
+      <button class="btn-continue" onclick="nextStep()" ${!state.category ? 'disabled' : ''}>Continue</button>
+    </div>
+  `;
+}
+
+function renderDetail() {
+  const subs = (SUB_CATEGORIES[state.category] || []).map(s => `
+    <div class="option-card ${state.sub_category === s ? 'selected' : ''}" data-value="${s}" onclick="selectSub('${s.replace(/'/g,"\\'")}')">
+      <input type="radio" name="sub_cat" value="${s}" ${state.sub_category === s ? 'checked' : ''} style="min-width:18px;height:18px;"/>
+      <label>${s}</label>
+    </div>
+  `).join('');
+
+  const catLabel = (CATEGORIES.find(c => c.id === state.category) || {}).label || '';
+
+  return `
+    <h1 class="question-title">What's the problem with ${catLabel}?</h1>
+    <p class="question-sub">Choose the option that best describes what happened.</p>
+    <div class="options-grid">${subs}</div>
+    <div>
+      <button class="btn-back" onclick="prevStep()">← Back</button>
+      <button class="btn-continue" onclick="nextStep()" ${!state.sub_category ? 'disabled' : ''}>Continue</button>
+    </div>
+  `;
+}
+
+function renderWhatHappened() {
+  const contactOpts = CONTACT_METHODS.map(m => `
+    <div class="option-card ${state.contact_method === m ? 'selected' : ''}" onclick="selectContact('${m.replace(/'/g,"\\'")}')">
+      <input type="radio" name="contact" value="${m}" ${state.contact_method === m ? 'checked' : ''} style="min-width:18px;height:18px;"/>
+      <label>${m}</label>
+    </div>
+  `).join('');
+
+  const amountOpts = AMOUNT_OPTIONS.map(a => `
+    <option value="${a}" ${state.amount_lost === a ? 'selected' : ''}>${a}</option>
+  `).join('');
+
+  return `
+    <h1 class="question-title">Tell us what happened</h1>
+    <p class="question-sub">Your information helps us stop fraud and protect others.</p>
+
+    <div style="margin-bottom:20px;">
+      <label class="form-label">How did the scammer first contact you? <span style="color:#d83933;">*</span></label>
+      <div class="options-grid">${contactOpts}</div>
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <label class="form-label">How much money did you pay (or were asked to pay)?</label>
+      <select class="text-input" id="amount_lost" style="max-width:360px;" onchange="state.amount_lost=this.value;render();">
+        <option value="">- Select -</option>
+        ${amountOpts}
+      </select>
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <label class="form-label">What information do you have about the scammer?</label>
+      <p class="form-hint">Include names, phone numbers, email addresses, websites, addresses — anything that might help.</p>
+      <textarea class="text-input" id="scammer_info" placeholder="Type here..." onchange="state.scammer_info=this.value">${state.scammer_info}</textarea>
+    </div>
+
+    <div style="margin-bottom:24px;">
+      <label class="form-label">Describe what happened <span style="color:#d83933;">*</span></label>
+      <p class="form-hint">Include any details that might be helpful. Do not include your Social Security number or financial account numbers.</p>
+      <textarea class="text-input" id="description" placeholder="Describe the fraud or scam in as much detail as you can..." onchange="state.description=this.value" style="min-height:130px;">${state.description}</textarea>
+    </div>
+
+    <div>
+      <button class="btn-back" onclick="prevStep()">← Back</button>
+      <button class="btn-continue" onclick="nextStep()" ${!state.contact_method || !state.description ? 'disabled' : ''}>Continue</button>
+    </div>
+  `;
+}
+
+function renderContactInfo() {
+  return `
+    <h1 class="question-title">Your contact information</h1>
+    <p class="question-sub">Providing your information helps us investigate. All fields marked with an asterisk (*) are required.</p>
+
+    <div class="alert-box">
+      <strong>Privacy Notice:</strong> The information you provide is used to help law enforcement agencies and consumer protection organizations investigate fraud and scams. See our <a href="#" style="color:#1a4480;">Privacy Policy</a>.
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+      <div>
+        <label class="form-label" for="first_name">First name <span style="color:#d83933;">*</span></label>
+        <input type="text" class="text-input" id="first_name" value="${state.first_name}" placeholder="First name" oninput="state.first_name=this.value"/>
+      </div>
+      <div>
+        <label class="form-label" for="last_name">Last name <span style="color:#d83933;">*</span></label>
+        <input type="text" class="text-input" id="last_name" value="${state.last_name}" placeholder="Last name" oninput="state.last_name=this.value"/>
+      </div>
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <label class="form-label" for="email">Email address <span style="color:#d83933;">*</span></label>
+      <p class="form-hint">We'll send a copy of your report to this email address.</p>
+      <input type="email" class="text-input" id="email" value="${state.email}" placeholder="yourname@example.com" oninput="state.email=this.value" style="max-width:400px;"/>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+      <div>
+        <label class="form-label" for="phone">Phone number</label>
+        <input type="tel" class="text-input" id="phone" value="${state.phone}" placeholder="(555) 555-5555" oninput="state.phone=this.value"/>
+      </div>
+      <div>
+        <label class="form-label" for="zip_code">ZIP code</label>
+        <input type="text" class="text-input" id="zip_code" value="${state.zip_code}" placeholder="12345" maxlength="5" oninput="state.zip_code=this.value"/>
+      </div>
+    </div>
+
+    <div>
+      <button class="btn-back" onclick="prevStep()">← Back</button>
+      <button class="btn-continue" id="contact-continue-btn" onclick="validateContact()">Continue</button>
+    </div>
+  `;
+}
+
+function renderReview() {
+  const catLabel = (CATEGORIES.find(c => c.id === state.category) || {}).label || state.category;
+
+  return `
+    <h1 class="question-title">Review your report</h1>
+    <p class="question-sub">Please review the information below before submitting. You can go back to make changes.</p>
+
+    <hr class="section-divider"/>
+    <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:12px;color:#1a4480;">Problem Type</h3>
+    <div class="review-row"><div class="review-label">Category:</div><div class="review-value">${catLabel}</div></div>
+    <div class="review-row"><div class="review-label">Detail:</div><div class="review-value">${state.sub_category}</div></div>
+
+    <hr class="section-divider"/>
+    <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:12px;color:#1a4480;">What Happened</h3>
+    <div class="review-row"><div class="review-label">How contacted:</div><div class="review-value">${state.contact_method}</div></div>
+    ${state.amount_lost ? `<div class="review-row"><div class="review-label">Amount paid/asked:</div><div class="review-value">${state.amount_lost}</div></div>` : ''}
+    ${state.scammer_info ? `<div class="review-row"><div class="review-label">Scammer info:</div><div class="review-value">${state.scammer_info}</div></div>` : ''}
+    <div class="review-row"><div class="review-label">Description:</div><div class="review-value">${state.description}</div></div>
+
+    <hr class="section-divider"/>
+    <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:12px;color:#1a4480;">Your Contact Information</h3>
+    <div class="review-row"><div class="review-label">Name:</div><div class="review-value">${state.first_name} ${state.last_name}</div></div>
+    <div class="review-row"><div class="review-label">Email:</div><div class="review-value">${state.email}</div></div>
+    ${state.phone ? `<div class="review-row"><div class="review-label">Phone:</div><div class="review-value">${state.phone}</div></div>` : ''}
+    ${state.zip_code ? `<div class="review-row"><div class="review-label">ZIP code:</div><div class="review-value">${state.zip_code}</div></div>` : ''}
+    <hr class="section-divider"/>
+
+    <p style="font-size:0.88rem;color:#555;margin-bottom:20px;">By submitting this report, you certify that the information you provided is accurate and complete to the best of your knowledge.</p>
+
+    <div>
+      <button class="btn-back" onclick="prevStep()">← Back</button>
+      <button class="btn-continue" onclick="submitReport()">Submit Report</button>
+    </div>
+  `;
+}
+
+function renderConfirmation() {
+  return `
+    <div class="confirmation-box">
+      <h2>✓ Your report has been submitted</h2>
+      <p>Thank you for reporting this to the FTC. Your report reference number is:</p>
+      <p class="confirmation-number" style="margin-top:8px;">${state.report_number}</p>
+    </div>
+
+    <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:10px;">What happens next?</h2>
+    <p style="margin-bottom:12px;font-size:0.95rem;">Your report was shared with more than 3,000 law enforcement agencies across the country. While the FTC does not resolve individual complaints, your report makes a difference — it helps law enforcement agencies detect patterns of fraud and abuse.</p>
+
+    <p style="margin-bottom:12px;font-size:0.95rem;">You will receive a copy of your report at <strong>${state.email}</strong>.</p>
+
+    <hr class="section-divider"/>
+    <h3 style="font-weight:700;margin-bottom:10px;font-size:1.05rem;">Protect yourself and others</h3>
+    <ul style="font-size:0.93rem;color:#333;padding-left:20px;line-height:1.9;">
+      <li>Visit <a href="https://consumer.ftc.gov" style="color:#1a4480;">consumer.ftc.gov</a> for tips on avoiding scams</li>
+      <li>If you gave money, contact your bank or payment service immediately</li>
+      <li>If you shared personal information, visit <a href="https://identitytheft.gov" style="color:#1a4480;">IdentityTheft.gov</a></li>
+      <li>Share this experience with friends and family to help protect them</li>
+    </ul>
+
+    <hr class="section-divider"/>
+    <button class="btn-continue" onclick="startOver()" style="margin-top:8px;">Submit Another Report</button>
+  `;
+}
+
+// ---- Event Handlers ----
+
+function selectCategory(id) {
+  state.category = id;
+  state.sub_category = '';
+  render();
+}
+
+function selectSub(val) {
+  state.sub_category = val;
+  render();
+}
+
+function selectContact(val) {
+  state.contact_method = val;
+  render();
+}
+
+function nextStep() {
+  if (state.step < STEPS.length - 1) {
+    state.step++;
+    render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function prevStep() {
+  if (state.step > 0) {
+    state.step--;
+    render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function validateContact() {
+  const fn = document.getElementById('first_name');
+  const ln = document.getElementById('last_name');
+  const em = document.getElementById('email');
+  state.first_name = fn ? fn.value : state.first_name;
+  state.last_name = ln ? ln.value : state.last_name;
+  state.email = em ? em.value : state.email;
+  if (!state.first_name || !state.last_name || !state.email) {
+    alert('Please fill in your first name, last name, and email address.');
+    return;
+  }
+  nextStep();
+}
+
+function submitReport() {
+  // Generate a fake report number like FTC would
+  const num = 'FTC-' + Math.random().toString(36).substr(2,4).toUpperCase() + '-' + Date.now().toString().slice(-6);
+  state.report_number = num;
+
+  // Save to entity
+  const payload = {
+    category: state.category,
+    sub_category: state.sub_category,
+    description: state.description,
+    amount_lost: state.amount_lost,
+    contact_method: state.contact_method,
+    scammer_info: state.scammer_info,
+    first_name: state.first_name,
+    last_name: state.last_name,
+    email: state.email,
+    phone: state.phone,
+    zip_code: state.zip_code,
+    status: 'submitted'
+  };
+
+  fetch('/api/entities/FraudReport', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).catch(()=>{});
+
+  nextStep();
+}
+
+function startOver() {
+  state = {
+    step: 0, category: '', sub_category: '', description: '',
+    amount_lost: '', contact_method: '', scammer_info: '',
+    first_name: '', last_name: '', email: '', phone: '',
+    zip_code: '', report_number: ''
+  };
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function attachEvents() {
+  // sync textarea/input values on input
+  ['description','scammer_info'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', e => { state[id] = e.target.value; });
+  });
+  ['first_name','last_name','email','phone','zip_code'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', e => { state[id] = e.target.value; });
+  });
+  const amtEl = document.getElementById('amount_lost');
+  if (amtEl) amtEl.addEventListener('change', e => { state.amount_lost = e.target.value; });
+}
+
+// Init
+render();
+</script>
+</body>
+</html>
